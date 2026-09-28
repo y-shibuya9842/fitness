@@ -100,16 +100,42 @@ function inputAmountToBasePoints(exercise, value) {
   return exercise.inputType === "duration" ? value / 3 : value;
 }
 function calcCurrentPoints(now = new Date()) {
+  const thresholds = getThresholds();
+  const maxPoints = thresholds.red;
   const points = Object.fromEntries(PARTS.map(([k]) => [k, 0]));
-  for (const record of getRecords()) {
+  const lastUpdatedAt = Object.fromEntries(PARTS.map(([k]) => [k, null]));
+
+  // 記録時点ごとに「減衰 → 加算 → 赤閾値で上限」の順に計算する。
+  // これにより、赤を超えるトレーニング量が内部ポイントとして蓄積されず、
+  // 赤到達後も通常どおり時間経過で色が戻る。
+  const records = getRecords()
+    .map(record => ({...record, performed: new Date(record.performedAt)}))
+    .filter(record => !Number.isNaN(record.performed.getTime()) && record.performed <= now)
+    .sort((a,b) => a.performed - b.performed);
+
+  for (const record of records) {
     const ex = findExercise(record.exerciseId);
     if (!ex) continue;
-    const performed = new Date(record.performedAt);
-    const elapsedHours = Math.max(0, (now - performed) / 36e5);
-    const retention = Math.pow(DAILY_RETENTION, elapsedHours / 24);
     const base = inputAmountToBasePoints(ex, Number(record.value) || 0);
-    for (const m of ex.muscles) points[m.part] += base * m.weight * retention;
+
+    for (const m of ex.muscles) {
+      const last = lastUpdatedAt[m.part];
+      if (last) {
+        const elapsedHours = Math.max(0, (record.performed - last) / 36e5);
+        points[m.part] *= Math.pow(DAILY_RETENTION, elapsedHours / 24);
+      }
+      points[m.part] = Math.min(maxPoints, points[m.part] + base * m.weight);
+      lastUpdatedAt[m.part] = record.performed;
+    }
   }
+
+  for (const [part] of PARTS) {
+    const last = lastUpdatedAt[part];
+    if (!last) continue;
+    const elapsedHours = Math.max(0, (now - last) / 36e5);
+    points[part] *= Math.pow(DAILY_RETENTION, elapsedHours / 24);
+  }
+
   return points;
 }
 function hexToRgb(hex) {
