@@ -140,13 +140,9 @@ function renderHome() {
   const thresholds = getThresholds();
   const points = calcCurrentPoints();
   document.querySelectorAll(".muscle-part").forEach(el => {
-    el.style.fill = getBodyPartColor(points[el.dataset.part] || 0, thresholds);
+    const color = getBodyPartColor(points[el.dataset.part] || 0, thresholds);
+    el.style.fill = color;
   });
-  const score = document.getElementById("body-score-list");
-  score.innerHTML = PARTS.map(([key,label]) => `<div class="score-pill"><span>${label}</span><strong>${points[key].toFixed(1)}pt</strong></div>`).join("");
-  document.getElementById("today-label").textContent = formatDateJP(localDateString());
-  const todayRecords = getRecords().filter(r => r.date === localDateString()).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
-  renderRecordRows(todayRecords, document.getElementById("today-records"));
 }
 
 function renderRecordRows(records, container) {

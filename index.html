@@ -19,100 +19,92 @@
 
     <main>
       <section class="screen active" id="screen-home">
-        <div class="card body-card">
-          <div class="body-header">
-            <div>
-              <h2>トレーニング状況</h2>
-              <p>ポイントは時間とともに少しずつ減衰します</p>
-            </div>
-            <div class="decay-chip">1日 90% 残存</div>
-          </div>
-
-          <div class="body-visuals">
-            <div class="body-panel">
+        <div class="hero-body-card">
+          <div class="body-stage">
+            <div class="figure-wrap">
               <span class="body-label">前面</span>
-              <svg class="body-svg" viewBox="0 0 220 460" aria-label="人体前面">
-                <g class="body-base">
-                  <circle cx="110" cy="45" r="28"/>
-                  <path d="M85 78 Q110 68 135 78 L151 156 Q146 210 134 252 L132 424 L100 424 L100 270 L88 270 L88 424 L56 424 L58 252 Q46 210 41 156 Z"/>
-                  <path d="M42 108 L17 208 L37 217 L68 134 Z"/>
-                  <path d="M178 108 L203 208 L183 217 L152 134 Z"/>
+              <svg class="anatomy-svg" viewBox="0 0 260 560" aria-label="人体前面">
+                <defs>
+                  <filter id="softGlowFront" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="5" result="blur"/>
+                    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                  <linearGradient id="bodyBaseFront" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f8fbff"/><stop offset="55%" stop-color="#edf3f9"/><stop offset="100%" stop-color="#e6edf5"/>
+                  </linearGradient>
+                </defs>
+                <g class="body-shell" fill="url(#bodyBaseFront)">
+                  <ellipse cx="130" cy="45" rx="30" ry="36"/>
+                  <path d="M104 76 C88 83 72 95 63 117 C56 134 57 153 64 174 L76 221 C80 237 76 260 68 278 C62 292 57 309 58 331 L67 504 C68 525 81 541 98 541 C111 541 119 531 120 514 L124 324 L136 324 L140 514 C141 531 149 541 162 541 C179 541 192 525 193 504 L202 331 C203 309 198 292 192 278 C184 260 180 237 184 221 L196 174 C203 153 204 134 197 117 C188 95 172 83 156 76 C149 82 140 87 130 87 C120 87 111 82 104 76 Z"/>
+                  <path d="M67 115 C50 121 38 138 32 160 L13 259 C10 276 18 290 31 292 C43 294 51 284 54 269 L77 183 Z"/>
+                  <path d="M193 115 C210 121 222 138 228 160 L247 259 C250 276 242 290 229 292 C217 294 209 284 206 269 L183 183 Z"/>
                 </g>
-                <g class="muscle-part" data-part="shoulders">
-                  <path d="M56 98 Q70 78 90 84 L83 120 L58 134 Z"/>
-                  <path d="M164 98 Q150 78 130 84 L137 120 L162 134 Z"/>
+                <g class="body-outline" fill="none" stroke="#ffffff" stroke-width="3" opacity=".9">
+                  <ellipse cx="130" cy="45" rx="30" ry="36"/>
+                  <path d="M104 76 C88 83 72 95 63 117 C56 134 57 153 64 174 L76 221 C80 237 76 260 68 278 C62 292 57 309 58 331 L67 504 C68 525 81 541 98 541 C111 541 119 531 120 514 L124 324 L136 324 L140 514 C141 531 149 541 162 541 C179 541 192 525 193 504 L202 331 C203 309 198 292 192 278 C184 260 180 237 184 221 L196 174 C203 153 204 134 197 117 C188 95 172 83 156 76"/>
                 </g>
-                <g class="muscle-part" data-part="chest">
-                  <path d="M86 92 Q110 82 134 92 L136 142 Q110 156 84 142 Z"/>
+                <g filter="url(#softGlowFront)">
+                  <path class="muscle-part muscle-soft" data-part="shoulders" d="M72 112 C83 91 101 86 115 95 L107 132 C94 135 82 132 70 125 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="shoulders" d="M188 112 C177 91 159 86 145 95 L153 132 C166 135 178 132 190 125 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="chest" d="M105 103 C113 95 124 94 130 99 L130 151 C117 159 102 157 89 148 L91 113 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="chest" d="M155 103 C147 95 136 94 130 99 L130 151 C143 159 158 157 171 148 L169 113 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="arms" d="M68 130 C54 140 49 159 45 181 L30 258 C28 270 33 278 41 278 C48 278 52 271 54 261 L75 173 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="arms" d="M192 130 C206 140 211 159 215 181 L230 258 C232 270 227 278 219 278 C212 278 208 271 206 261 L185 173 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="abs" d="M108 156 C116 160 123 162 130 162 C137 162 144 160 152 156 L155 249 C147 263 139 270 130 270 C121 270 113 263 105 249 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="thighs" d="M75 278 C88 267 105 267 119 276 L118 392 C111 410 101 421 88 421 C77 421 70 410 69 393 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="thighs" d="M185 278 C172 267 155 267 141 276 L142 392 C149 410 159 421 172 421 C183 421 190 410 191 393 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="calves" d="M70 398 C81 389 103 390 116 400 L112 506 C108 523 99 531 89 531 C78 531 71 520 71 505 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="calves" d="M190 398 C179 389 157 390 144 400 L148 506 C152 523 161 531 171 531 C182 531 189 520 189 505 Z"/>
                 </g>
-                <g class="muscle-part" data-part="arms">
-                  <path d="M52 116 L26 204 L47 211 L72 132 Z"/>
-                  <path d="M168 116 L194 204 L173 211 L148 132 Z"/>
-                </g>
-                <g class="muscle-part" data-part="abs">
-                  <path d="M86 146 L134 146 L131 242 L89 242 Z"/>
-                </g>
-                <g class="muscle-part" data-part="thighs">
-                  <path d="M61 247 L95 247 L96 337 L63 337 Z"/>
-                  <path d="M125 247 L159 247 L157 337 L124 337 Z"/>
-                </g>
-                <g class="muscle-part" data-part="calves">
-                  <path d="M63 341 L95 341 L93 423 L65 423 Z"/>
-                  <path d="M125 341 L157 341 L155 423 L127 423 Z"/>
+                <g class="muscle-lines" fill="none" stroke="#ffffff" stroke-width="2" opacity=".55">
+                  <path d="M130 102 L130 255"/><path d="M108 182 L152 182"/><path d="M107 208 L153 208"/><path d="M106 235 L154 235"/>
                 </g>
               </svg>
+              <div class="callout left c1"><i></i>肩</div>
+              <div class="callout left c2"><i></i>胸</div>
+              <div class="callout left c3"><i></i>腕</div>
+              <div class="callout left c4"><i></i>腹筋</div>
             </div>
 
-            <div class="body-panel">
+            <div class="figure-wrap">
               <span class="body-label">背面</span>
-              <svg class="body-svg" viewBox="0 0 220 460" aria-label="人体背面">
-                <g class="body-base">
-                  <circle cx="110" cy="45" r="28"/>
-                  <path d="M85 78 Q110 68 135 78 L151 156 Q146 210 134 252 L132 424 L100 424 L100 270 L88 270 L88 424 L56 424 L58 252 Q46 210 41 156 Z"/>
-                  <path d="M42 108 L17 208 L37 217 L68 134 Z"/>
-                  <path d="M178 108 L203 208 L183 217 L152 134 Z"/>
+              <svg class="anatomy-svg" viewBox="0 0 260 560" aria-label="人体背面">
+                <defs>
+                  <filter id="softGlowBack" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="5" result="blur"/>
+                    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                  <linearGradient id="bodyBaseBack" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f8fbff"/><stop offset="55%" stop-color="#edf3f9"/><stop offset="100%" stop-color="#e6edf5"/>
+                  </linearGradient>
+                </defs>
+                <g class="body-shell" fill="url(#bodyBaseBack)">
+                  <ellipse cx="130" cy="45" rx="30" ry="36"/>
+                  <path d="M104 76 C88 83 72 95 63 117 C56 134 57 153 64 174 L76 221 C80 237 76 260 68 278 C62 292 57 309 58 331 L67 504 C68 525 81 541 98 541 C111 541 119 531 120 514 L124 324 L136 324 L140 514 C141 531 149 541 162 541 C179 541 192 525 193 504 L202 331 C203 309 198 292 192 278 C184 260 180 237 184 221 L196 174 C203 153 204 134 197 117 C188 95 172 83 156 76 C149 82 140 87 130 87 C120 87 111 82 104 76 Z"/>
+                  <path d="M67 115 C50 121 38 138 32 160 L13 259 C10 276 18 290 31 292 C43 294 51 284 54 269 L77 183 Z"/>
+                  <path d="M193 115 C210 121 222 138 228 160 L247 259 C250 276 242 290 229 292 C217 294 209 284 206 269 L183 183 Z"/>
                 </g>
-                <g class="muscle-part" data-part="shoulders">
-                  <path d="M56 98 Q70 78 90 84 L83 120 L58 134 Z"/>
-                  <path d="M164 98 Q150 78 130 84 L137 120 L162 134 Z"/>
+                <g filter="url(#softGlowBack)">
+                  <path class="muscle-part muscle-soft" data-part="shoulders" d="M72 112 C83 91 101 86 115 95 L107 132 C94 135 82 132 70 125 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="shoulders" d="M188 112 C177 91 159 86 145 95 L153 132 C166 135 178 132 190 125 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="back" d="M102 102 C112 95 122 93 130 98 C138 93 148 95 158 102 L175 182 C163 212 149 232 130 244 C111 232 97 212 85 182 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="arms" d="M68 130 C54 140 49 159 45 181 L30 258 C28 270 33 278 41 278 C48 278 52 271 54 261 L75 173 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="arms" d="M192 130 C206 140 211 159 215 181 L230 258 C232 270 227 278 219 278 C212 278 208 271 206 261 L185 173 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="glutes" d="M82 242 C98 231 116 233 130 245 L130 307 C113 318 95 317 80 303 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="glutes" d="M178 242 C162 231 144 233 130 245 L130 307 C147 318 165 317 180 303 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="thighs" d="M75 304 C88 295 105 294 119 304 L118 392 C111 410 101 421 88 421 C77 421 70 410 69 393 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="thighs" d="M185 304 C172 295 155 294 141 304 L142 392 C149 410 159 421 172 421 C183 421 190 410 191 393 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="calves" d="M70 398 C81 389 103 390 116 400 L112 506 C108 523 99 531 89 531 C78 531 71 520 71 505 Z"/>
+                  <path class="muscle-part muscle-soft" data-part="calves" d="M190 398 C179 389 157 390 144 400 L148 506 C152 523 161 531 171 531 C182 531 189 520 189 505 Z"/>
                 </g>
-                <g class="muscle-part" data-part="back">
-                  <path d="M83 95 Q110 80 137 95 L142 194 Q110 218 78 194 Z"/>
-                </g>
-                <g class="muscle-part" data-part="arms">
-                  <path d="M52 116 L26 204 L47 211 L72 132 Z"/>
-                  <path d="M168 116 L194 204 L173 211 L148 132 Z"/>
-                </g>
-                <g class="muscle-part" data-part="glutes">
-                  <path d="M78 196 Q110 184 142 196 L140 252 Q110 270 80 252 Z"/>
-                </g>
-                <g class="muscle-part" data-part="thighs">
-                  <path d="M61 252 L95 252 L96 337 L63 337 Z"/>
-                  <path d="M125 252 L159 252 L157 337 L124 337 Z"/>
-                </g>
-                <g class="muscle-part" data-part="calves">
-                  <path d="M63 341 L95 341 L93 423 L65 423 Z"/>
-                  <path d="M125 341 L157 341 L155 423 L127 423 Z"/>
-                </g>
+                <g class="muscle-lines" fill="none" stroke="#ffffff" stroke-width="2" opacity=".45"><path d="M130 98 L130 244"/><path d="M130 245 L130 310"/></g>
               </svg>
+              <div class="callout right c1"><i></i>背中</div>
+              <div class="callout right c2"><i></i>お尻</div>
+              <div class="callout right c3"><i></i>太もも</div>
+              <div class="callout right c4"><i></i>ふくらはぎ</div>
             </div>
           </div>
-
-          <div class="gradient-legend">
-            <span>少ない</span>
-            <div class="gradient-bar"></div>
-            <span>多い</span>
-          </div>
-
-          <div id="body-score-list" class="body-score-list"></div>
-        </div>
-
-        <div class="card today-card">
-          <div class="section-title-row">
-            <h2>今日の記録</h2>
-            <span id="today-label"></span>
-          </div>
-          <div id="today-records" class="record-list compact"></div>
         </div>
 
         <button class="primary floating-action" id="open-register">＋ 記録する</button>
