@@ -10,7 +10,7 @@ const PARTS = [
 ];
 
 const DEFAULT_THRESHOLDS = { blue: 10, yellow: 30, red: 60 };
-const DAILY_RETENTION = 0.9;
+const POINT_DECAY_PER_HOUR = 1;
 
 const DEFAULT_EXERCISES = [
   {id:"push_up",name:"プッシュアップ",category:"bodyweight",inputType:"reps",muscles:[["chest",1],["arms",.5],["shoulders",.25]]},
@@ -105,9 +105,9 @@ function calcCurrentPoints(now = new Date()) {
   const points = Object.fromEntries(PARTS.map(([k]) => [k, 0]));
   const lastUpdatedAt = Object.fromEntries(PARTS.map(([k]) => [k, null]));
 
-  // 記録時点ごとに「減衰 → 加算 → 赤閾値で上限」の順に計算する。
-  // これにより、赤を超えるトレーニング量が内部ポイントとして蓄積されず、
-  // 赤到達後も通常どおり時間経過で色が戻る。
+  // 記録時点ごとに「1時間あたり1ptの線形減衰 → 加算 → 赤閾値で上限」の順に計算する。
+  // 30分なら0.5pt、90分なら1.5pt減るため、時間に比例してリアルタイムに戻る。
+  // 赤を超えるトレーニング量は内部ポイントとして蓄積しない。
   const records = getRecords()
     .map(record => ({...record, performed: new Date(record.performedAt)}))
     .filter(record => !Number.isNaN(record.performed.getTime()) && record.performed <= now)
@@ -122,7 +122,7 @@ function calcCurrentPoints(now = new Date()) {
       const last = lastUpdatedAt[m.part];
       if (last) {
         const elapsedHours = Math.max(0, (record.performed - last) / 36e5);
-        points[m.part] *= Math.pow(DAILY_RETENTION, elapsedHours / 24);
+        points[m.part] = Math.max(0, points[m.part] - elapsedHours * POINT_DECAY_PER_HOUR);
       }
       points[m.part] = Math.min(maxPoints, points[m.part] + base * m.weight);
       lastUpdatedAt[m.part] = record.performed;
@@ -133,7 +133,7 @@ function calcCurrentPoints(now = new Date()) {
     const last = lastUpdatedAt[part];
     if (!last) continue;
     const elapsedHours = Math.max(0, (now - last) / 36e5);
-    points[part] *= Math.pow(DAILY_RETENTION, elapsedHours / 24);
+    points[part] = Math.max(0, points[part] - elapsedHours * POINT_DECAY_PER_HOUR);
   }
 
   return points;
@@ -363,4 +363,11 @@ document.getElementById("save-custom-exercise").addEventListener("click",()=>{
 document.addEventListener("DOMContentLoaded",()=>{
   if(!localStorage.getItem(STORAGE_KEYS.thresholds)) setThresholds(DEFAULT_THRESHOLDS);
   renderHome(); renderHistory(); renderThresholds(); renderExerciseMaster();
+
+  // 画面を開いたままでも経過時間に応じて色をリアルタイム更新する。
+  setInterval(renderHome, 1000);
+});
+
+document.addEventListener("visibilitychange",()=>{
+  if (!document.hidden) renderHome();
 });
