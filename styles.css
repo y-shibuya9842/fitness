@@ -174,13 +174,15 @@ input:focus, select:focus { border-color:#9bb9ff; box-shadow:0 0 0 3px #eaf1ff; 
 .body-stage {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2px;
-  min-height: 610px;
+  gap: 8px;
+  min-height: 590px;
 }
 .figure-wrap {
   position: relative;
   min-width: 0;
   padding-top: 38px;
+  display:flex;
+  justify-content:center;
 }
 .figure-wrap .body-label {
   position: absolute;
@@ -198,12 +200,13 @@ input:focus, select:focus { border-color:#9bb9ff; box-shadow:0 0 0 3px #eaf1ff; 
 }
 .anatomy-svg {
   width: 100%;
-  height: 560px;
+  max-width: 255px;
+  height: 540px;
   display: block;
   overflow: visible;
-  filter: drop-shadow(0 12px 20px rgba(45,79,122,.12));
+  filter: drop-shadow(0 16px 24px rgba(45,79,122,.10));
 }
-.body-shell { opacity: .92; }
+.body-shell { opacity: .96; }
 .muscle-part {
   fill: #ffffff;
   stroke: rgba(255,255,255,.95);
@@ -211,6 +214,7 @@ input:focus, select:focus { border-color:#9bb9ff; box-shadow:0 0 0 3px #eaf1ff; 
   transition: fill .45s ease, filter .45s ease, opacity .45s ease;
 }
 .muscle-soft { opacity: .96; }
+.muscle-part { opacity: .94; }
 .callout {
   position: absolute;
   z-index: 7;
@@ -237,18 +241,20 @@ input:focus, select:focus { border-color:#9bb9ff; box-shadow:0 0 0 3px #eaf1ff; 
 }
 .callout.left { left: -2px; }
 .callout.right { right: -2px; }
-.callout.c1 { top: 122px; }
-.callout.c2 { top: 224px; }
-.callout.c3 { top: 335px; }
-.callout.c4 { top: 455px; }
-.figure-wrap:first-child .callout.c2 i { background:#f6b924; box-shadow:0 0 12px rgba(246,185,36,.45); }
-.figure-wrap:nth-child(2) .callout.c2 i { background:#f6b924; box-shadow:0 0 12px rgba(246,185,36,.45); }
-.figure-wrap:nth-child(2) .callout.c3 i { background:#ef4444; box-shadow:0 0 12px rgba(239,68,68,.45); }
+.callout.c1 { top: 128px; }
+.callout.c2 { top: 230px; }
+.callout.c3 { top: 336px; }
+.callout.c4 { top: 446px; }
+.callout.c5 { top: 456px; }
+.figure-front .callout.c2 i { background:#f6b924; box-shadow:0 0 12px rgba(246,185,36,.45); }
+.figure-front .callout.c5 i { background:#ef4444; box-shadow:0 0 12px rgba(239,68,68,.45); }
+.figure-back .callout.c2 i { background:#f6b924; box-shadow:0 0 12px rgba(246,185,36,.45); }
+.figure-back .callout.c3 i { background:#ef4444; box-shadow:0 0 12px rgba(239,68,68,.45); }
 .floating-action {
   position: sticky;
   bottom: 88px;
   z-index: 10;
-  margin-top: 16px;
+  margin-top: 10px;
   min-height: 56px;
   border-radius: 20px;
   font-size: 18px;
@@ -256,14 +262,15 @@ input:focus, select:focus { border-color:#9bb9ff; box-shadow:0 0 0 3px #eaf1ff; 
 }
 @media (max-width: 420px) {
   .hero-body-card { padding-left: 2px; padding-right: 2px; border-radius: 24px; }
-  .body-stage { min-height: 545px; }
-  .anatomy-svg { height: 515px; }
+  .body-stage { min-height: 525px; gap: 4px; }
+  .anatomy-svg { height: 500px; max-width: 220px; }
   .callout { min-width: 58px; padding: 7px 8px; font-size: 10px; gap: 5px; }
   .callout i { width: 7px; height: 7px; }
   .callout.left { left: -6px; }
   .callout.right { right: -6px; }
   .callout.c1 { top: 116px; }
-  .callout.c2 { top: 211px; }
-  .callout.c3 { top: 311px; }
-  .callout.c4 { top: 417px; }
+  .callout.c2 { top: 210px; }
+  .callout.c3 { top: 309px; }
+  .callout.c4 { top: 411px; }
+  .callout.c5 { top: 425px; }
 }
