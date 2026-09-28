@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f9fc" />
+  <title>マイボディ</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <h1>マイボディ</h1>
+        <p>継続が、理想のカラダをつくる</p>
+      </div>
+      <button class="icon-button" id="open-register-header" aria-label="記録を追加">＋</button>
+    </header>
+
+    <main>
+      <section class="screen active" id="screen-home">
+        <div class="card body-card">
+          <div class="body-header">
+            <div>
+              <h2>トレーニング状況</h2>
+              <p>ポイントは時間とともに少しずつ減衰します</p>
+            </div>
+            <div class="decay-chip">1日 90% 残存</div>
+          </div>
+
+          <div class="body-visuals">
+            <div class="body-panel">
+              <span class="body-label">前面</span>
+              <svg class="body-svg" viewBox="0 0 220 460" aria-label="人体前面">
+                <g class="body-base">
+                  <circle cx="110" cy="45" r="28"/>
+                  <path d="M85 78 Q110 68 135 78 L151 156 Q146 210 134 252 L132 424 L100 424 L100 270 L88 270 L88 424 L56 424 L58 252 Q46 210 41 156 Z"/>
+                  <path d="M42 108 L17 208 L37 217 L68 134 Z"/>
+                  <path d="M178 108 L203 208 L183 217 L152 134 Z"/>
+                </g>
+                <g class="muscle-part" data-part="shoulders">
+                  <path d="M56 98 Q70 78 90 84 L83 120 L58 134 Z"/>
+                  <path d="M164 98 Q150 78 130 84 L137 120 L162 134 Z"/>
+                </g>
+                <g class="muscle-part" data-part="chest">
+                  <path d="M86 92 Q110 82 134 92 L136 142 Q110 156 84 142 Z"/>
+                </g>
+                <g class="muscle-part" data-part="arms">
+                  <path d="M52 116 L26 204 L47 211 L72 132 Z"/>
+                  <path d="M168 116 L194 204 L173 211 L148 132 Z"/>
+                </g>
+                <g class="muscle-part" data-part="abs">
+                  <path d="M86 146 L134 146 L131 242 L89 242 Z"/>
+                </g>
+                <g class="muscle-part" data-part="thighs">
+                  <path d="M61 247 L95 247 L96 337 L63 337 Z"/>
+                  <path d="M125 247 L159 247 L157 337 L124 337 Z"/>
+                </g>
+                <g class="muscle-part" data-part="calves">
+                  <path d="M63 341 L95 341 L93 423 L65 423 Z"/>
+                  <path d="M125 341 L157 341 L155 423 L127 423 Z"/>
+                </g>
+              </svg>
+            </div>
+
+            <div class="body-panel">
+              <span class="body-label">背面</span>
+              <svg class="body-svg" viewBox="0 0 220 460" aria-label="人体背面">
+                <g class="body-base">
+                  <circle cx="110" cy="45" r="28"/>
+                  <path d="M85 78 Q110 68 135 78 L151 156 Q146 210 134 252 L132 424 L100 424 L100 270 L88 270 L88 424 L56 424 L58 252 Q46 210 41 156 Z"/>
+                  <path d="M42 108 L17 208 L37 217 L68 134 Z"/>
+                  <path d="M178 108 L203 208 L183 217 L152 134 Z"/>
+                </g>
+                <g class="muscle-part" data-part="shoulders">
+                  <path d="M56 98 Q70 78 90 84 L83 120 L58 134 Z"/>
+                  <path d="M164 98 Q150 78 130 84 L137 120 L162 134 Z"/>
+                </g>
+                <g class="muscle-part" data-part="back">
+                  <path d="M83 95 Q110 80 137 95 L142 194 Q110 218 78 194 Z"/>
+                </g>
+                <g class="muscle-part" data-part="arms">
+                  <path d="M52 116 L26 204 L47 211 L72 132 Z"/>
+                  <path d="M168 116 L194 204 L173 211 L148 132 Z"/>
+                </g>
+                <g class="muscle-part" data-part="glutes">
+                  <path d="M78 196 Q110 184 142 196 L140 252 Q110 270 80 252 Z"/>
+                </g>
+                <g class="muscle-part" data-part="thighs">
+                  <path d="M61 252 L95 252 L96 337 L63 337 Z"/>
+                  <path d="M125 252 L159 252 L157 337 L124 337 Z"/>
+                </g>
+                <g class="muscle-part" data-part="calves">
+                  <path d="M63 341 L95 341 L93 423 L65 423 Z"/>
+                  <path d="M125 341 L157 341 L155 423 L127 423 Z"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <div class="gradient-legend">
+            <span>少ない</span>
+            <div class="gradient-bar"></div>
+            <span>多い</span>
+          </div>
+
+          <div id="body-score-list" class="body-score-list"></div>
+        </div>
+
+        <div class="card today-card">
+          <div class="section-title-row">
+            <h2>今日の記録</h2>
+            <span id="today-label"></span>
+          </div>
+          <div id="today-records" class="record-list compact"></div>
+        </div>
+
+        <button class="primary floating-action" id="open-register">＋ 記録する</button>
+      </section>
+
+      <section class="screen" id="screen-history">
+        <div class="section-heading">
+          <h2>トレーニング履歴</h2>
+          <p>日ごとの記録を確認できます</p>
+        </div>
+        <div id="history-list" class="history-list"></div>
+      </section>
+
+      <section class="screen" id="screen-settings">
+        <div class="section-heading">
+          <h2>設定</h2>
+          <p>色の基準や種目マスタを管理できます</p>
+        </div>
+
+        <div class="card settings-card">
+          <h3>色の基準設定</h3>
+          <p class="muted">ポイントに応じて白→青→黄→赤へ滑らかに変化します。</p>
+          <div class="threshold-grid">
+            <label>
+              <span>青の基準</span>
+              <div><input type="number" id="threshold-blue" min="1" step="1"><span>pt</span></div>
+            </label>
+            <label>
+              <span>黄の基準</span>
+              <div><input type="number" id="threshold-yellow" min="2" step="1"><span>pt</span></div>
+            </label>
+            <label>
+              <span>赤の基準</span>
+              <div><input type="number" id="threshold-red" min="3" step="1"><span>pt</span></div>
+            </label>
+          </div>
+          <div class="gradient-bar large"></div>
+          <button class="secondary full-width" id="save-thresholds">色設定を保存</button>
+          <p id="threshold-message" class="form-message"></p>
+        </div>
+
+        <div class="card settings-card">
+          <div class="section-title-row">
+            <div>
+              <h3>種目管理</h3>
+              <p class="muted">自宅トレーニングを中心に初期登録済みです。</p>
+            </div>
+            <button class="small-button" id="open-exercise-editor">＋ 種目追加</button>
+          </div>
+          <input class="search-input" id="settings-exercise-search" type="search" placeholder="種目を検索">
+          <div id="exercise-master-list" class="master-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-target="home"><span>⌂</span><small>ホーム</small></button>
+      <button class="nav-item" data-target="history"><span>≡</span><small>履歴</small></button>
+      <button class="nav-item" data-target="settings"><span>⚙</span><small>設定</small></button>
+    </nav>
+  </div>
+
+  <div class="modal-backdrop hidden" id="register-backdrop">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h2>トレーニングを登録</h2>
+        <button class="icon-button ghost" id="close-register">×</button>
+      </div>
+
+      <label class="form-field">
+        <span>日付</span>
+        <input type="date" id="record-date">
+      </label>
+
+      <div class="form-field">
+        <span>種目</span>
+        <button class="select-like" id="open-exercise-picker">
+          <span id="selected-exercise-label">種目を選択</span><span>›</span>
+        </button>
+        <p class="helper">部位は選択した種目に応じて自動で設定されます。</p>
+      </div>
+
+      <label class="form-field">
+        <span id="value-label">回数</span>
+        <div class="unit-input">
+          <input type="number" id="record-value" min="1" step="1" placeholder="10">
+          <span id="value-unit">回</span>
+        </div>
+      </label>
+
+      <div class="modal-actions">
+        <button class="secondary" id="cancel-register">キャンセル</button>
+        <button class="primary" id="save-record">登録する</button>
+      </div>
+      <p id="register-message" class="form-message"></p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="picker-backdrop">
+    <div class="bottom-sheet picker-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h2>種目を選択</h2>
+        <button class="icon-button ghost" id="close-picker">×</button>
+      </div>
+      <div id="part-filter" class="chip-row"></div>
+      <input class="search-input" id="exercise-search" type="search" placeholder="種目を検索">
+      <div id="exercise-picker-list" class="picker-list"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="exercise-editor-backdrop">
+    <div class="bottom-sheet editor-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h2 id="exercise-editor-title">種目を追加</h2>
+        <button class="icon-button ghost" id="close-exercise-editor">×</button>
+      </div>
+
+      <label class="form-field">
+        <span>種目名</span>
+        <input type="text" id="custom-name" placeholder="例：チューブローイング">
+      </label>
+
+      <label class="form-field">
+        <span>記録方法</span>
+        <select id="custom-input-type">
+          <option value="reps">回数</option>
+          <option value="duration">時間</option>
+        </select>
+      </label>
+
+      <div class="form-field">
+        <span>対象部位とポイント係数</span>
+        <p class="helper">最低1部位を選択してください。主対象1.0 / 副対象0.5 / 補助0.25 が目安です。</p>
+        <div id="custom-muscles" class="muscle-config-list"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="secondary" id="cancel-exercise-editor">キャンセル</button>
+        <button class="primary" id="save-custom-exercise">保存</button>
+      </div>
+      <p id="custom-message" class="form-message"></p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
