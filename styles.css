@@ -113,7 +113,7 @@ input:focus, select:focus { border-color:#9bb9ff; box-shadow:0 0 0 3px #eaf1ff; 
 .bottom-nav {
   position:fixed; left:50%; bottom:0; transform:translateX(-50%);
   width:min(100%,620px); height:78px; background:rgba(255,255,255,.96);
-  border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(4,1fr);
   padding:8px 10px max(8px, env(safe-area-inset-bottom)); z-index:20;
 }
 .nav-item { border:0; background:transparent; color:#8a95a7; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
@@ -156,6 +156,24 @@ input:focus, select:focus { border-color:#9bb9ff; box-shadow:0 0 0 3px #eaf1ff; 
   border:1px solid var(--line); padding:10px; border-radius:12px;
 }
 .muscle-config-row input[type="checkbox"] { width:20px; height:20px; }
+.auth-overlay { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--bg); }
+.auth-overlay.hidden { display:none; }
+.auth-card { width:min(100%, 440px); padding:24px; }
+.auth-card h2 { margin:0; }
+.auth-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; }
+button:disabled { opacity:.55; cursor:wait; }
+.effort-total { padding:24px; background:linear-gradient(135deg,#356de0,#73a5ff); color:white; }
+.effort-total span, .effort-total p { font-size:13px; opacity:.9; }
+.effort-total strong { display:block; font-size:42px; margin:8px 0 2px; }
+.effort-total p { margin:0; }
+.effort-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+.effort-stat { padding:16px; display:flex; flex-direction:column; gap:5px; }
+.effort-stat span, .effort-stat small { color:var(--muted); font-size:12px; }
+.effort-stat strong { font-size:23px; }
+.effort-detail { padding:18px; margin-top:12px; }
+.effort-detail h3 { margin:0; font-size:16px; }
+.effort-detail p { line-height:1.7; }
+.backup-restore { margin-top:8px; }
 @media (max-width: 420px) {
   .body-score-list { grid-template-columns:1fr; }
   .body-svg { max-height:320px; }

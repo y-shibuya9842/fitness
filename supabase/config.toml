@@ -1,0 +1,5 @@
+project_id = "fitness"
+
+[auth]
+site_url = "https://y-shibuya9842.github.io/fitness/"
+additional_redirect_urls = ["https://y-shibuya9842.github.io/fitness/", "http://localhost:8000", "http://localhost:8000/", "http://127.0.0.1:8000", "http://127.0.0.1:8000/"]

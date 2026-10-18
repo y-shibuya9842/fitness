@@ -120,10 +120,45 @@
         <div id="history-list" class="history-list"></div>
       </section>
 
+      <section class="screen" id="screen-effort">
+        <div class="section-heading">
+          <h2>頑張りの記録</h2>
+          <p>積み重ねた日々を、ごほうびに換算</p>
+        </div>
+        <div class="card effort-total">
+          <span>これまでの頑張り</span>
+          <strong id="effort-total">¥0</strong>
+          <p id="effort-days">トレーニング 0日</p>
+        </div>
+        <div class="effort-stats">
+          <div class="card effort-stat"><span>連日ボーナス</span><strong id="effort-consecutive">¥0</strong><small id="effort-consecutive-count">0回</small></div>
+          <div class="card effort-stat"><span>週3日以上ボーナス</span><strong id="effort-weekly">¥0</strong><small id="effort-weekly-count">0回</small></div>
+        </div>
+        <div class="card effort-detail">
+          <h3>今のペース</h3>
+          <p id="effort-pace"></p>
+          <p class="helper">前日もトレーニングした日は100円。月〜日の週で3日目以降は、トレーニングした日ごとに100円。1日何種目でも1日として数えます。</p>
+        </div>
+      </section>
+
       <section class="screen" id="screen-settings">
         <div class="section-heading">
           <h2>設定</h2>
           <p>色の基準や種目マスタを管理できます</p>
+        </div>
+
+        <div class="card settings-card">
+          <h3>アカウントとデータ</h3>
+          <p class="muted" id="account-email"></p>
+          <p class="muted">トレーニング記録と設定はデータベースに保存されます。</p>
+          <button class="secondary full-width" id="import-legacy">このブラウザの旧データを移行</button>
+          <p class="helper">以前のブラウザに保存されている記録を追加します。移行後も元のデータは残ります。</p>
+          <button class="secondary full-width" id="export-data">データを JSON で保存</button>
+          <button class="secondary full-width backup-restore" id="restore-data">バックアップから追加</button>
+          <input id="backup-file" type="file" accept="application/json,.json" hidden>
+          <p class="helper">同じ ID のデータと、すでに保存されている色設定は上書きしません。</p>
+          <button class="link-button" id="sign-out">ログアウト</button>
+          <p id="account-message" class="form-message" role="status"></p>
         </div>
 
         <div class="card settings-card">
@@ -165,6 +200,7 @@
     <nav class="bottom-nav">
       <button class="nav-item active" data-target="home"><span>⌂</span><small>ホーム</small></button>
       <button class="nav-item" data-target="history"><span>≡</span><small>履歴</small></button>
+      <button class="nav-item" data-target="effort"><span>✦</span><small>頑張り</small></button>
       <button class="nav-item" data-target="settings"><span>⚙</span><small>設定</small></button>
     </nav>
   </div>
@@ -196,6 +232,16 @@
           <input type="number" id="record-value" min="1" step="1" placeholder="10">
           <span id="value-unit">回</span>
         </div>
+      </label>
+
+      <label class="form-field">
+        <span>負荷の目安</span>
+        <select id="record-intensity">
+          <option value="light">軽度（0.75倍）</option>
+          <option value="moderate">中度（1倍）</option>
+          <option value="hard">重度（1.5倍）</option>
+        </select>
+        <p class="helper">余裕が大きい＝軽度、ほどよくきつい＝中度、もう少しで限界＝重度。種目ごとの目安を変更できます。</p>
       </label>
 
       <div class="modal-actions">
@@ -240,6 +286,16 @@
         </select>
       </label>
 
+      <label class="form-field">
+        <span>標準の負荷</span>
+        <select id="custom-intensity">
+          <option value="light">軽度（0.75倍）</option>
+          <option value="moderate">中度（1倍）</option>
+          <option value="hard">重度（1.5倍）</option>
+        </select>
+        <p class="helper">登録時にその日の負荷に合わせて変更できます。</p>
+      </label>
+
       <div class="form-field">
         <span>対象部位とポイント係数</span>
         <p class="helper">最低1部位を選択してください。主対象1.0 / 副対象0.5 / 補助0.25 が目安です。</p>
@@ -254,6 +310,22 @@
     </div>
   </div>
 
+  <div class="auth-overlay" id="auth-overlay">
+    <div class="card auth-card">
+      <h2>マイボディ</h2>
+      <p class="muted" id="auth-description">ログインして、トレーニングを安全に保存しましょう。</p>
+      <form id="auth-form">
+        <label class="form-field"><span>メールアドレス</span><input id="auth-email" type="email" autocomplete="email" required></label>
+        <label class="form-field"><span>パスワード</span><input id="auth-password" type="password" autocomplete="current-password" minlength="6" required></label>
+        <div class="auth-actions"><button class="primary" id="sign-in" type="submit">ログイン</button><button class="secondary" id="sign-up" type="button">新規登録</button></div>
+      </form>
+      <p class="form-message" id="auth-message" role="status"></p>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="core.js"></script>
+  <script src="storage.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

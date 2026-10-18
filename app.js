@@ -11,6 +11,14 @@ const PARTS = [
 
 const DEFAULT_THRESHOLDS = { blue: 10, yellow: 30, red: 60 };
 const POINT_DECAY_PER_HOUR = 1;
+const { INTENSITIES, calculateEffort, pointsFor, dayNumber } = MyBodyCore;
+const LIGHT_EXERCISES = new Set(["incline_push_up", "back_extension", "superman", "side_raise", "front_raise", "rear_raise", "kickback", "crunch", "bicycle_crunch", "hip_lift", "calf_raise"]);
+const HARD_EXERCISES = new Set(["decline_push_up", "bench_press", "incline_bench_press", "pull_up", "chin_up", "deadlift", "pike_push_up", "ab_roller", "bulgarian_squat"]);
+function defaultIntensity(ex) {
+  return ex?.intensity || (LIGHT_EXERCISES.has(ex?.id) ? "light" : HARD_EXERCISES.has(ex?.id) ? "hard" : "moderate");
+}
+function intensityLabel(value) { return (INTENSITIES[value] || INTENSITIES.moderate).label; }
+function escapeHtml(value) { return String(value).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 
 const DEFAULT_EXERCISES = [
   {id:"push_up",name:"プッシュアップ",category:"bodyweight",inputType:"reps",muscles:[["chest",1],["arms",.5],["shoulders",.25]]},
@@ -68,17 +76,10 @@ let selectedExerciseId = null;
 let selectedFilter = "all";
 let editingCustomId = null;
 
-function load(key, fallback) {
-  try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; }
-  catch { return fallback; }
-}
-function save(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
-function getRecords() { return load(STORAGE_KEYS.records, []); }
-function setRecords(v) { save(STORAGE_KEYS.records, v); }
-function getCustomExercises() { return load(STORAGE_KEYS.customExercises, []); }
-function setCustomExercises(v) { save(STORAGE_KEYS.customExercises, v); }
-function getThresholds() { return load(STORAGE_KEYS.thresholds, DEFAULT_THRESHOLDS); }
-function setThresholds(v) { save(STORAGE_KEYS.thresholds, v); }
+let appData = { records: [], exercises: [], thresholds: null };
+function getRecords() { return appData.records; }
+function getCustomExercises() { return appData.exercises; }
+function getThresholds() { return appData.thresholds || DEFAULT_THRESHOLDS; }
 function getExercises() { return [...DEFAULT_EXERCISES, ...getCustomExercises()]; }
 function findExercise(id) { return getExercises().find(e => e.id === id); }
 
@@ -95,9 +96,6 @@ function buildPerformedAt(dateString) {
   if (dateString === localDateString(now)) return now.toISOString();
   const d = new Date(dateString + "T12:00:00");
   return d.toISOString();
-}
-function inputAmountToBasePoints(exercise, value) {
-  return exercise.inputType === "duration" ? value / 3 : value;
 }
 function calcCurrentPoints(now = new Date()) {
   const thresholds = getThresholds();
@@ -116,7 +114,8 @@ function calcCurrentPoints(now = new Date()) {
   for (const record of records) {
     const ex = findExercise(record.exerciseId);
     if (!ex) continue;
-    const base = inputAmountToBasePoints(ex, Number(record.value) || 0);
+    // 旧記録はこれまでの計算を維持するため中度として扱う。
+    const base = pointsFor(ex, Number(record.value) || 0, record.intensity || "moderate");
 
     for (const m of ex.muscles) {
       const last = lastUpdatedAt[m.part];
@@ -156,10 +155,10 @@ function getBodyPartColor(p, t) {
 }
 function unitText(ex) { return ex.inputType === "duration" ? "秒" : "回"; }
 function categoryLabel(c) {
-  return {bodyweight:"自重",dumbbell:"ダンベル",equipment:"器具",machine:"マシン",barbell:"バーベル",custom:"ユーザー作成"}[c] || c;
+  return {bodyweight:"自重",dumbbell:"ダンベル",equipment:"器具",machine:"マシン",barbell:"バーベル",custom:"ユーザー作成"}[c] || escapeHtml(c);
 }
 function muscleNames(ex) {
-  return ex.muscles.map(m => PARTS.find(p=>p[0]===m.part)?.[1] || m.part).join("・");
+  return ex.muscles.map(m => PARTS.find(p=>p[0]===m.part)?.[1] || escapeHtml(m.part)).join("・");
 }
 
 function renderHome() {
@@ -177,8 +176,8 @@ function renderRecordRows(records, container) {
     const ex = findExercise(r.exerciseId);
     if (!ex) return "";
     return `<div class="record-row">
-      <div class="record-main"><strong>${ex.name}</strong><span>${muscleNames(ex)}</span></div>
-      <div class="record-value">${r.value}${unitText(ex)}</div>
+      <div class="record-main"><strong>${escapeHtml(ex.name)}</strong><span>${muscleNames(ex)} / ${intensityLabel(r.intensity)}</span></div>
+      <div class="record-value">${Number(r.value)}${unitText(ex)}</div>
     </div>`;
   }).join("");
 }
@@ -192,10 +191,22 @@ function renderHistory() {
       <div class="history-date">${formatDateJP(date)}</div>
       <div class="record-list">${groups[date].map(r=>{
         const ex=findExercise(r.exerciseId); if(!ex) return "";
-        return `<div class="record-row"><div class="record-main"><strong>${ex.name}</strong><span>${muscleNames(ex)}</span></div><div class="record-value">${r.value}${unitText(ex)}</div></div>`
+        return `<div class="record-row"><div class="record-main"><strong>${escapeHtml(ex.name)}</strong><span>${muscleNames(ex)} / ${intensityLabel(r.intensity)}</span></div><div class="record-value">${Number(r.value)}${unitText(ex)}</div></div>`
       }).join("")}</div>
     </div>`).join("");
   document.getElementById("history-list").innerHTML = html || `<div class="empty-state">履歴はまだありません</div>`;
+}
+
+function renderEffort() {
+  const effort = calculateEffort(getRecords(), localDateString());
+  const yen = value => `¥${value.toLocaleString("ja-JP")}`;
+  document.getElementById("effort-total").textContent = yen(effort.total);
+  document.getElementById("effort-days").textContent = `トレーニング ${effort.trainingDays}日`;
+  document.getElementById("effort-consecutive").textContent = yen(effort.consecutiveCount * 100);
+  document.getElementById("effort-consecutive-count").textContent = `${effort.consecutiveCount}回 × 100円`;
+  document.getElementById("effort-weekly").textContent = yen(effort.weeklyCount * 100);
+  document.getElementById("effort-weekly-count").textContent = `${effort.weeklyCount}回 × 100円`;
+  document.getElementById("effort-pace").textContent = `今週 ${effort.thisWeekDays}日 / 継続 ${effort.streak}日`;
 }
 
 function renderThresholds() {
@@ -209,9 +220,9 @@ function renderExerciseMaster() {
   const items = getExercises().filter(e => e.name.toLowerCase().includes(q));
   document.getElementById("exercise-master-list").innerHTML = items.map(e => `
     <div class="master-item">
-      <div><strong>${e.name}</strong><small>${categoryLabel(e.category)} / ${e.inputType==="duration"?"時間":"回数"} / ${muscleNames(e)}</small></div>
+      <div><strong>${escapeHtml(e.name)}</strong><small>${categoryLabel(e.category)} / ${e.inputType==="duration"?"時間":"回数"} / ${muscleNames(e)} / 標準 ${intensityLabel(defaultIntensity(e))}</small></div>
       <div class="master-actions">
-        ${e.isCustom ? `<button class="link-button" data-edit="${e.id}">編集</button><button class="link-button danger" data-delete="${e.id}">削除</button>` : ""}
+        ${e.isCustom ? `<button class="link-button" data-edit="${escapeHtml(e.id)}">編集</button><button class="link-button danger" data-delete="${escapeHtml(e.id)}">削除</button>` : ""}
       </div>
     </div>
   `).join("");
@@ -223,6 +234,7 @@ function openRegister() {
   document.getElementById("register-message").textContent = "";
   selectedExerciseId = null;
   document.getElementById("selected-exercise-label").textContent = "種目を選択";
+  document.getElementById("record-intensity").value = "moderate";
   updateValueField(null);
   document.getElementById("register-backdrop").classList.remove("hidden");
 }
@@ -243,7 +255,7 @@ function renderExercisePicker() {
   if (selectedFilter !== "all") items = items.filter(e => e.muscles.some(m=>m.part===selectedFilter));
   if (q) items = items.filter(e => e.name.toLowerCase().includes(q));
   document.getElementById("exercise-picker-list").innerHTML = items.map(e=>`
-    <div class="picker-item"><button data-pick="${e.id}"><strong>${e.name}</strong><small>${e.inputType==="duration"?"時間":"回数"} / ${muscleNames(e)}</small></button></div>
+    <div class="picker-item"><button data-pick="${escapeHtml(e.id)}"><strong>${escapeHtml(e.name)}</strong><small>${e.inputType==="duration"?"時間":"回数"} / ${muscleNames(e)} / 標準 ${intensityLabel(defaultIntensity(e))}</small></button></div>
   `).join("") || `<div class="empty-state">該当する種目がありません</div>`;
 }
 
@@ -253,6 +265,7 @@ function openExerciseEditor(id=null) {
   document.getElementById("exercise-editor-title").textContent = ex ? "種目を編集" : "種目を追加";
   document.getElementById("custom-name").value = ex?.name || "";
   document.getElementById("custom-input-type").value = ex?.inputType || "reps";
+  document.getElementById("custom-intensity").value = defaultIntensity(ex);
   document.getElementById("custom-message").textContent = "";
   document.getElementById("custom-muscles").innerHTML = PARTS.map(([key,label])=>{
     const existing=ex?.muscles.find(m=>m.part===key);
@@ -274,6 +287,7 @@ document.querySelectorAll(".nav-item").forEach(btn=>btn.addEventListener("click"
   document.getElementById("screen-"+btn.dataset.target).classList.add("active");
   if(btn.dataset.target==="home") renderHome();
   if(btn.dataset.target==="history") renderHistory();
+  if(btn.dataset.target==="effort") renderEffort();
   if(btn.dataset.target==="settings"){ renderThresholds(); renderExerciseMaster(); }
 }));
 
@@ -295,50 +309,65 @@ document.getElementById("exercise-picker-list").addEventListener("click",e=>{
   const ex=findExercise(selectedExerciseId);
   document.getElementById("selected-exercise-label").textContent=ex.name;
   updateValueField(ex);
+  document.getElementById("record-intensity").value=defaultIntensity(ex);
   document.getElementById("record-value").value="";
   document.getElementById("picker-backdrop").classList.add("hidden");
 });
 
-document.getElementById("save-record").addEventListener("click",()=>{
+document.getElementById("save-record").addEventListener("click",async e=>{
+  const btn=e.currentTarget;
   const msg=document.getElementById("register-message"); msg.textContent="";
   const date=document.getElementById("record-date").value;
   const value=Number(document.getElementById("record-value").value);
   const ex=findExercise(selectedExerciseId);
   if(!date){msg.textContent="日付を選択してください。";return;}
+  if(!Number.isFinite(dayNumber(date)) || date > localDateString()){msg.textContent="今日以前の日付を選択してください。";return;}
   if(!ex){msg.textContent="種目を選択してください。";return;}
   if(!Number.isInteger(value)||value<1){msg.textContent=`${ex.inputType==="duration"?"時間":"回数"}は1以上の整数で入力してください。`;return;}
-  const records=getRecords();
-  records.push({id:crypto.randomUUID?.()||String(Date.now()),date,performedAt:buildPerformedAt(date),exerciseId:ex.id,value,createdAt:new Date().toISOString()});
-  setRecords(records);
-  closeRegister(); renderHome(); renderHistory();
+  const record={id:crypto.randomUUID?.()||String(Date.now()),date,performedAt:buildPerformedAt(date),exerciseId:ex.id,value,intensity:document.getElementById("record-intensity").value,createdAt:new Date().toISOString()};
+  btn.disabled=true;
+  try {
+    await MyBodyStorage.put("training_records", record);
+    appData.records.push(record);
+    closeRegister(); renderHome(); renderHistory(); renderEffort();
+  } catch(error) { msg.textContent = `保存できませんでした。${error.message || "接続をご確認ください。"}`; }
+  finally { btn.disabled=false; }
 });
 
-document.getElementById("save-thresholds").addEventListener("click",()=>{
+document.getElementById("save-thresholds").addEventListener("click",async e=>{
+  const btn=e.currentTarget;
   const blue=Number(document.getElementById("threshold-blue").value);
   const yellow=Number(document.getElementById("threshold-yellow").value);
   const red=Number(document.getElementById("threshold-red").value);
   const msg=document.getElementById("threshold-message");
   if(!(blue>0 && yellow>blue && red>yellow)){ msg.textContent="0 < 青 < 黄 < 赤 になるよう設定してください。"; return; }
-  setThresholds({blue,yellow,red}); msg.style.color="#2d8a55"; msg.textContent="保存しました。"; renderHome();
+  btn.disabled=true;
+  try { await MyBodyStorage.saveThresholds({blue,yellow,red}); appData.thresholds={blue,yellow,red}; msg.style.color="#2d8a55"; msg.textContent="保存しました。"; renderHome(); }
+  catch(error) { msg.style.color=""; msg.textContent=`保存できませんでした。${error.message || "接続をご確認ください。"}`; }
+  finally { btn.disabled=false; }
 });
 
 document.getElementById("settings-exercise-search").addEventListener("input",renderExerciseMaster);
 document.getElementById("open-exercise-editor").addEventListener("click",()=>openExerciseEditor());
 ["close-exercise-editor","cancel-exercise-editor"].forEach(id=>document.getElementById(id).addEventListener("click",closeExerciseEditor));
 
-document.getElementById("exercise-master-list").addEventListener("click",e=>{
+document.getElementById("exercise-master-list").addEventListener("click",async e=>{
   const edit=e.target.closest("[data-edit]"); const del=e.target.closest("[data-delete]");
   if(edit) openExerciseEditor(edit.dataset.edit);
   if(del){
+    if(getRecords().some(r=>r.exerciseId===del.dataset.delete)){ alert("この種目は履歴で使用されているため削除できません。履歴を残すため、種目を編集してご利用ください。"); return; }
     if(!confirm("この種目を削除しますか？")) return;
-    setCustomExercises(getCustomExercises().filter(x=>x.id!==del.dataset.delete));
-    renderExerciseMaster();
+    del.disabled=true;
+    try { await MyBodyStorage.remove("custom_exercises", del.dataset.delete); appData.exercises=appData.exercises.filter(x=>x.id!==del.dataset.delete); renderExerciseMaster(); }
+    catch(error) { alert(`削除できませんでした。${error.message || "接続をご確認ください。"}`); del.disabled=false; }
   }
 });
 
-document.getElementById("save-custom-exercise").addEventListener("click",()=>{
+document.getElementById("save-custom-exercise").addEventListener("click",async e=>{
+  const btn=e.currentTarget;
   const name=document.getElementById("custom-name").value.trim();
   const inputType=document.getElementById("custom-input-type").value;
+  const intensity=document.getElementById("custom-intensity").value;
   const msg=document.getElementById("custom-message"); msg.textContent="";
   const muscles=[];
   document.querySelectorAll("[data-muscle-check]").forEach(ch=>{
@@ -350,21 +379,103 @@ document.getElementById("save-custom-exercise").addEventListener("click",()=>{
   });
   if(!name){msg.textContent="種目名を入力してください。";return;}
   if(!muscles.length){msg.textContent="対象部位を1つ以上選択してください。";return;}
-  const customs=getCustomExercises();
+  const customs=[...getCustomExercises()];
+  let exercise;
   if(editingCustomId){
     const i=customs.findIndex(x=>x.id===editingCustomId);
-    if(i>=0) customs[i]={...customs[i],name,inputType,muscles};
+    if(i<0){msg.textContent="種目が見つかりません。再読み込みしてください。";return;}
+    exercise={...customs[i],name,inputType,intensity,muscles}; customs[i]=exercise;
   } else {
-    customs.push({id:"custom_"+(crypto.randomUUID?.()||Date.now()),name,category:"custom",inputType,isCustom:true,muscles});
+    exercise={id:"custom_"+(crypto.randomUUID?.()||Date.now()),name,category:"custom",inputType,intensity,isCustom:true,muscles}; customs.push(exercise);
   }
-  setCustomExercises(customs); closeExerciseEditor(); renderExerciseMaster(); renderExercisePicker();
+  btn.disabled=true;
+  try { await MyBodyStorage.put("custom_exercises",exercise); appData.exercises=customs; closeExerciseEditor(); renderExerciseMaster(); renderExercisePicker(); renderHome(); renderHistory(); }
+  catch(error) { msg.textContent=`保存できませんでした。${error.message || "接続をご確認ください。"}`; }
+  finally { btn.disabled=false; }
 });
 
-document.addEventListener("DOMContentLoaded",()=>{
-  if(!localStorage.getItem(STORAGE_KEYS.thresholds)) setThresholds(DEFAULT_THRESHOLDS);
-  renderHome(); renderHistory(); renderThresholds(); renderExerciseMaster();
-
-  // 画面を開いたままでも経過時間に応じて色をリアルタイム更新する。
+function renderAll() { renderHome(); renderHistory(); renderEffort(); renderThresholds(); renderExerciseMaster(); }
+function validateImport(records, exercises, thresholds) {
+  const validRecords=Array.isArray(records) && records.every(r=>r && typeof r.id==="string" && r.id && Number.isFinite(dayNumber(r.date)) && typeof r.exerciseId==="string" && r.exerciseId && Number.isFinite(new Date(r.performedAt).getTime()) && Number.isInteger(r.value) && r.value>0);
+  const validExercises=Array.isArray(exercises) && exercises.every(x=>x && typeof x.id==="string" && x.id && typeof x.name==="string" && x.name.trim() && ["reps","duration"].includes(x.inputType) && Array.isArray(x.muscles) && x.muscles.length && x.muscles.every(m=>m && PARTS.some(([part])=>part===m.part) && [1,.5,.25].includes(m.weight)));
+  const validThresholds=thresholds===null || (thresholds && Number.isFinite(thresholds.blue) && thresholds.blue>0 && thresholds.yellow>thresholds.blue && Number.isFinite(thresholds.yellow) && thresholds.red>thresholds.yellow && Number.isFinite(thresholds.red));
+  if(!validRecords || !validExercises || !validThresholds) throw new Error("データの形式が正しくありません。元のデータは変更していません。");
+}
+async function enterApp(user) {
+  appData = await MyBodyStorage.load();
+  document.getElementById("account-email").textContent = user.email || "";
+  document.getElementById("account-message").textContent = "";
+  renderAll();
+  document.getElementById("auth-overlay").classList.add("hidden");
+}
+function authError(error) { document.getElementById("auth-message").textContent = `接続できませんでした。${error.message || "設定をご確認ください。"}`; }
+document.getElementById("auth-form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const btn=document.getElementById("sign-in"); btn.disabled=true;
+  try { await enterApp(await MyBodyStorage.signIn(document.getElementById("auth-email").value.trim(),document.getElementById("auth-password").value)); }
+  catch(error) { authError(error); }
+  finally { btn.disabled=false; }
+});
+document.getElementById("sign-up").addEventListener("click",async e=>{
+  const btn=e.currentTarget;
+  const form=document.getElementById("auth-form"); if(!form.reportValidity()) return;
+  btn.disabled=true;
+  try {
+    const user=await MyBodyStorage.signUp(document.getElementById("auth-email").value.trim(),document.getElementById("auth-password").value);
+    if(user) await enterApp(user);
+    else document.getElementById("auth-message").textContent="確認メールを送信しました。メール内のリンクで認証してからログインしてください。";
+  } catch(error) { authError(error); }
+  finally { btn.disabled=false; }
+});
+document.getElementById("sign-out").addEventListener("click",async e=>{
+  const btn=e.currentTarget; btn.disabled=true;
+  try { await MyBodyStorage.signOut(); appData={records:[],exercises:[],thresholds:null}; document.getElementById("auth-password").value=""; document.getElementById("auth-overlay").classList.remove("hidden"); }
+  catch(error) { document.getElementById("account-message").textContent=`ログアウトできませんでした。${error.message || ""}`; }
+  finally { btn.disabled=false; }
+});
+document.getElementById("import-legacy").addEventListener("click",async e=>{
+  const msg=document.getElementById("account-message");
+  msg.textContent="";
+  const btn=e.currentTarget; btn.disabled=true;
+  try {
+    const read = key => { const raw=localStorage.getItem(key); return raw === null ? null : JSON.parse(raw); };
+    const records=read(STORAGE_KEYS.records) || [];
+    const exercises=read(STORAGE_KEYS.customExercises) || [];
+    const thresholds=read(STORAGE_KEYS.thresholds);
+    validateImport(records,exercises,thresholds);
+    if(!records.length && !exercises.length && !thresholds) { msg.textContent="このブラウザに移行対象の旧データはありません。"; return; }
+    await MyBodyStorage.importLegacy(records,exercises,thresholds);
+    appData=await MyBodyStorage.load(); renderAll();
+    msg.textContent="旧データを移行しました。同じ記録の重複は追加されません。";
+  } catch(error) { msg.textContent=`移行できませんでした。${error.message || "接続をご確認ください。"}`; }
+  finally { btn.disabled=false; }
+});
+document.getElementById("export-data").addEventListener("click",async e=>{
+  const btn=e.currentTarget; btn.disabled=true;
+  try {
+    appData=await MyBodyStorage.load(); renderAll();
+    const file=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),...appData},null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(file); const a=document.createElement("a"); a.href=url; a.download=`mybody-${localDateString()}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  } catch(error) { document.getElementById("account-message").textContent=`バックアップできませんでした。${error.message || "接続をご確認ください。"}`; }
+  finally { btn.disabled=false; }
+});
+document.getElementById("restore-data").addEventListener("click",()=>document.getElementById("backup-file").click());
+document.getElementById("backup-file").addEventListener("change",async e=>{
+  const input=e.currentTarget; const file=input.files[0]; if(!file) return;
+  const msg=document.getElementById("account-message");
+  msg.textContent="";
+  const btn=document.getElementById("restore-data"); btn.disabled=true;
+  try {
+    const data=JSON.parse(await file.text());
+    validateImport(data.records,data.exercises,data.thresholds ?? null);
+    await MyBodyStorage.importLegacy(data.records,data.exercises,data.thresholds || null);
+    appData=await MyBodyStorage.load(); renderAll(); msg.textContent="バックアップからデータを追加しました。";
+  } catch(error) { msg.textContent=`追加できませんでした。${error.message || "接続をご確認ください。"}`; }
+  finally { input.value=""; btn.disabled=false; }
+});
+document.addEventListener("DOMContentLoaded",async ()=>{
+  try { MyBodyStorage.init(); const user=await MyBodyStorage.session(); if(user) await enterApp(user); }
+  catch(error) { authError(error); }
   setInterval(renderHome, 1000);
 });
 

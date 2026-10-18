@@ -1,0 +1,10 @@
+{
+  "name": "mybody",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/core.test.js"
+  },
+  "devDependencies": {
+    "supabase": "^2.121.0"
+  }
+}
