@@ -206,7 +206,7 @@ function renderEffort() {
   document.getElementById("effort-consecutive-count").textContent = `${effort.consecutiveCount}回 × 100円`;
   document.getElementById("effort-weekly").textContent = yen(effort.weeklyCount * 100);
   document.getElementById("effort-weekly-count").textContent = `${effort.weeklyCount}回 × 100円`;
-  document.getElementById("effort-pace").textContent = `今週 ${effort.thisWeekDays}日 / 継続 ${effort.streak}日`;
+  document.getElementById("effort-pace").textContent = `直近7日 ${effort.recentSevenDays}日 / 継続 ${effort.streak}日`;
 }
 
 function renderThresholds() {

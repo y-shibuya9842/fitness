@@ -15,14 +15,15 @@
   function calculateEffort(records, today) {
     const todayNumber = dayNumber(today);
     const days = [...new Set(records.map(r => dayNumber(r.date)).filter(n => Number.isFinite(n) && n <= todayNumber))].sort((a, b) => a - b);
-    let consecutiveCount = 0, weeklyCount = 0, previous = null, week = null, daysInWeek = 0;
-    for (const day of days) {
-      // 1970-01-01 は木曜日。月曜日を週の始まりにする。
-      const monday = day - ((day + 3) % 7 + 7) % 7;
-      if (monday !== week) { week = monday; daysInWeek = 0; }
-      daysInWeek++;
+    let consecutiveCount = 0, weeklyCount = 0, previous = null, windowStart = 0;
+    for (let index = 0; index < days.length; index++) {
+      const day = days[index];
+      // 「週3日」は曜日で区切らず、その日を含む直近7日間で判定する。
+      // これなら日曜日に始めても、3回目のトレーニング当日から加算される。
+      while (days[windowStart] < day - 6) windowStart++;
+      const daysInLastSevenDays = index - windowStart + 1;
       if (previous !== null && day === previous + 1) consecutiveCount++;
-      if (daysInWeek >= 3) weeklyCount++;
+      if (daysInLastSevenDays >= 3) weeklyCount++;
       previous = day;
     }
     let streak = 0;
@@ -30,9 +31,8 @@
       streak = 1;
       for (let i = days.length - 1; i > 0 && days[i] === days[i - 1] + 1; i--) streak++;
     }
-    const thisMonday = todayNumber - ((todayNumber + 3) % 7 + 7) % 7;
-    const thisWeekDays = days.filter(day => day >= thisMonday).length;
-    return { consecutiveCount, weeklyCount, total: (consecutiveCount + weeklyCount) * 100, trainingDays: days.length, streak, thisWeekDays };
+    const recentSevenDays = days.filter(day => day >= todayNumber - 6).length;
+    return { consecutiveCount, weeklyCount, total: (consecutiveCount + weeklyCount) * 100, trainingDays: days.length, streak, recentSevenDays };
   }
 
   function pointsFor(exercise, value, intensity = "moderate") {
